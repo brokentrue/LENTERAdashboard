@@ -4,7 +4,7 @@ namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
-class CreateSopStepsTable extends Migration
+class CreateProgressTracingTable extends Migration
 {
     public function up()
     {
@@ -16,32 +16,39 @@ class CreateSopStepsTable extends Migration
                 'auto_increment' => true,
             ],
 
-            'sop_step_id' => [
+            'progress_id' => [
                 'type'       => 'INT',
                 'constraint' => 11,
                 'unsigned'   => true,
             ],
 
-            'urutan' => [
-                'type'       => 'TINYINT',
-                'constraint' => 2,
+            'tracing_step_id' => [
+                'type'       => 'INT',
+                'constraint' => 11,
                 'unsigned'   => true,
             ],
 
-            'nama_proses' => [
-                'type'       => 'VARCHAR',
-                'constraint' => 255,
+            'status' => [
+                'type' => 'ENUM',
+                'constraint' => ['belum', 'proses', 'selesai'],
+                'null' => true,
             ],
 
-            'deskripsi' => [
+            'catatan' => [
                 'type' => 'TEXT',
                 'null' => true,
             ],
 
-            'is_active' => [
-                'type'       => 'TINYINT',
-                'constraint' => 1,
-                'default'    => 1,
+            'tanggal_update' => [
+                'type' => 'DATETIME',
+                'null' => true,
+            ],
+
+            'updated_by' => [
+                'type'       => 'INT',
+                'constraint' => 11,
+                'unsigned'   => true,
+                'null'       => true,
             ],
 
             'created_at' => [
@@ -58,24 +65,32 @@ class CreateSopStepsTable extends Migration
         $this->forge->addKey('id', true);
 
         $this->forge->addKey(
-            ['sop_step_id', 'urutan'],
+            ['progress_id', 'tracing_step_id'],
             false,
             true
         );
 
         $this->forge->addForeignKey(
-            'sop_step_id',
-            'sop_steps',
+            'progress_id',
+            'progress',
             'id',
             'CASCADE',
             'CASCADE'
         );
 
-        $this->forge->createTable('sop_tracing_steps');
+        $this->forge->addForeignKey(
+            'tracing_step_id',
+            'sop_tracing_steps',
+            'id',
+            'CASCADE',
+            'CASCADE'
+        );
+
+        $this->forge->createTable('progress_tracing');
     }
 
     public function down()
     {
-        $this->forge->dropTable('sop_tracing_steps', true);
+        $this->forge->dropTable('progress_tracing', true);
     }
 }
