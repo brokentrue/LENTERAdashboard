@@ -1,0 +1,46 @@
+services:
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dashboard-rap-app
+    volumes:
+      - .:/var/www/html
+    networks:
+      - rap-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: dashboard-rap-nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    networks:
+      - rap-network
+
+  db:
+    image: mysql:8.0
+    container_name: dashboard-rap-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: dashboard_rap
+      MYSQL_USER: rap_user
+      MYSQL_PASSWORD: rap_password
+      MYSQL_ROOT_PASSWORD: root_password
+    ports:
+      - "3307:3306"
+    volumes:
+      - rap-db-data:/var/lib/mysql
+    networks:
+      - rap-network
+
+networks:
+  rap-network:
+
+volumes:
+  rap-db-data:
