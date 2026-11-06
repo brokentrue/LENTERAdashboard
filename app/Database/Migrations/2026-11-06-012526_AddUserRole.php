@@ -1,0 +1,26 @@
+<?php
+
+namespace App\Database\Migrations;
+
+use CodeIgniter\Database\Migration;
+
+class AddUserRole extends Migration
+{
+    public function up()
+    {
+        $exists = $this->db->table('roles')
+            ->where('name', 'User')
+            ->countAllResults();
+
+        if ($exists === 0) {
+            $this->db->table('roles')->insert([
+                'name' => 'User',
+            ]);
+        }
+    }
+
+    public function down()
+    {
+        // Role tidak dihapus untuk menjaga data pengguna.
+    }
+}

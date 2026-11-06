@@ -1317,7 +1317,17 @@
             <div>
                 <div class="user-name"> <?= esc(session()->get('name') ?? 'Administrator') ?> </div>
                 <div class="user-role"> Administrator / Koordinator </div>
-            </div> <a class="logout" href="/logout"> Keluar </a>
+           
+</div>
+
+<form action="<?= site_url('logout') ?>" method="post" class="logout-form">
+    <?= csrf_field() ?>
+
+    <button type="submit" class="logout">
+        Keluar
+    </button>
+</form>
+
         </div>
     </header>
     <main class="container"> <!-- PAGE HEADING -->

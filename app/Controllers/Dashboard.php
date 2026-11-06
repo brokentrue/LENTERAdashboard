@@ -1,361 +1,367 @@
+
 <?php
 
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
-use App\Models\AspirasiModel;
-use App\Models\ProgressModel;
-use App\Models\SopStepsModel;
-use App\Models\MasaSidangModel;
-use App\Models\SubWilayahModel;
+use Config\Database;
 
 class Dashboard extends BaseController
 {
     public function index()
     {
-        /*
-        |--------------------------------------------------------------------------
-        | MODEL
-        |--------------------------------------------------------------------------
-        */
+        $db = Database::connect();
+        $session = session();
 
-        $aspirasiModel    = new AspirasiModel();
-        $progressModel    = new ProgressModel();
-        $sopModel         = new SopStepsModel();
-        $masaSidangModel  = new MasaSidangModel();
-        $subWilayahModel  = new SubWilayahModel();
+        $userId = (int) (
+            $session->get('user_id')
+            ?: $session->get('id')
+        );
 
+        if ($userId <= 0) {
+            return redirect()->to(site_url('login'));
+        }
 
-        /*
-        |--------------------------------------------------------------------------
-        | FILTER
-        |--------------------------------------------------------------------------
-        */
+        // Identitas dan hak akses dibaca ulang dari database.
+        $user = $db->table('users')
+            ->select(
+                'users.id, users.name, users.is_active,
+                 users.sub_wilayah_id,
+                 roles.name AS role_name,
+                 sub_wilayah.name AS wilayah_name'
+            )
+            ->join('roles', 'roles.id = users.role_id')
+            ->join(
+                'sub_wilayah',
+                'sub_wilayah.id = users.sub_wilayah_id',
+                'left'
+            )
+            ->where('users.id', $userId)
+            ->get()
+            ->getRowArray();
 
-        $tahun          = $this->request->getGet('tahun');
-        $masaSidangId   = $this->request->getGet('masa_sidang');
-        $subWilayahId   = $this->request->getGet('sub_wilayah');
+        if (!$user || (int) $user['is_active'] !== 1) {
+            return service('response')
+                ->setStatusCode(403)
+                ->setBody('Akun tidak aktif atau tidak ditemukan.');
+        }
 
+        $isAdmin = $user['role_name'] === 'Admin';
+        $isKoordinator = $user['role_name'] === 'Koordinator';
 
-        /*
-        |--------------------------------------------------------------------------
-        | DAFTAR FILTER
-        |--------------------------------------------------------------------------
-        */
+        if (!$isAdmin && !$isKoordinator) {
+            return service('response')
+                ->setStatusCode(403)
+                ->setBody('Akun belum memiliki akses dashboard.');
+        }
 
-        $tahunList = $masaSidangModel
-            ->select('tahun')
-            ->distinct()
-            ->orderBy('tahun', 'DESC')
-            ->findAll();
+        if ($isKoordinator && empty($user['sub_wilayah_id'])) {
+            return service('response')
+                ->setStatusCode(403)
+                ->setBody('Sub Wilayah belum ditetapkan oleh Admin.');
+        }
 
-        $masaSidangList = $masaSidangModel
-            ->orderBy('tahun', 'DESC')
-            ->orderBy('nomor', 'ASC')
-            ->findAll();
+        // Periode yang disediakan dalam LENTERA.
+        $tahunList = [2026, 2027, 2028, 2029];
+        $nomorMasaSidang = [1, 2, 3, 4, 5];
 
-        $subWilayahList = $subWilayahModel
+        $tahun = (int) ($this->request->getGet('tahun') ?: 2026);
+        $nomor = (int) ($this->request->getGet('masa_sidang') ?: 1);
+
+        if (!in_array($tahun, $tahunList, true)
+            || !in_array($nomor, $nomorMasaSidang, true)) {
+            return service('response')
+                ->setStatusCode(400)
+                ->setBody('Periode tidak valid.');
+        }
+
+        $periode = $db->table('masa_sidang')
+            ->where('tahun', $tahun)
+            ->where('nomor', $nomor)
+            ->get()
+            ->getRowArray();
+
+        $masaSidangId = $periode
+            ? (int) $periode['id']
+            : null;
+
+        $subWilayahList = $db->table('sub_wilayah')
             ->orderBy('id', 'ASC')
-            ->findAll();
+            ->get()
+            ->getResultArray();
 
+        // Koordinator tidak dapat mengganti wilayah melalui URL.
+        $subWilayahId = $isKoordinator
+            ? (int) $user['sub_wilayah_id']
+            : (int) $this->request->getGet('sub_wilayah');
 
-        /*
-        |--------------------------------------------------------------------------
-        | PERIODE DEFAULT
-        |--------------------------------------------------------------------------
-        */
-
-        $activePeriod = $masaSidangModel
-            ->orderBy('tahun', 'DESC')
-            ->orderBy('nomor', 'DESC')
-            ->first();
-
-        if (!$activePeriod) {
-            $activePeriod = [
-                'id'    => null,
-                'tahun' => date('Y'),
-                'nomor' => 1
-            ];
+        if ($subWilayahId <= 0) {
+            $subWilayahId = null;
         }
 
+        if ($subWilayahId !== null) {
+            $valid = in_array(
+                $subWilayahId,
+                array_map(
+                    static fn ($row) => (int) $row['id'],
+                    $subWilayahList
+                ),
+                true
+            );
 
-        /*
-        |--------------------------------------------------------------------------
-        | FILTER ASPIRASI
-        |--------------------------------------------------------------------------
-        */
-
-        $aspirasiQuery = $aspirasiModel;
-
-
-        /*
-        | Filter Tahun
-        */
-
-        if (!empty($tahun)) {
-
-            $masaIds = $masaSidangModel
-                ->select('id')
-                ->where('tahun', $tahun)
-                ->findColumn('id');
-
-            if (!empty($masaIds)) {
-                $aspirasiQuery->whereIn('masa_sidang_id', $masaIds);
-            } else {
-                $aspirasiQuery->where('id', 0);
+            if (!$valid) {
+                return service('response')
+                    ->setStatusCode(400)
+                    ->setBody('Sub Wilayah tidak valid.');
             }
         }
 
+        // Scope data aspirasi untuk satu periode.
+        $scopeAspirasi = static function ($query) use (
+            $masaSidangId,
+            $subWilayahId
+        ) {
+            if ($masaSidangId === null) {
+                $query->where('id', 0);
+            } else {
+                $query->where('masa_sidang_id', $masaSidangId);
+            }
 
-        /*
-        | Filter Masa Sidang
-        */
+            if ($subWilayahId !== null) {
+                $query->where('sub_wilayah_id', $subWilayahId);
+            }
 
-        if (!empty($masaSidangId)) {
-            $aspirasiQuery->where('masa_sidang_id', $masaSidangId);
-        }
+            return $query;
+        };
 
+        $totalAspirasi = $scopeAspirasi(
+            $db->table('aspirasi')
+        )->countAllResults();
 
-        /*
-        | Filter Sub Wilayah
-        */
-
-        if (!empty($subWilayahId)) {
-            $aspirasiQuery->where('sub_wilayah_id', $subWilayahId);
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | TOTAL ASPIRASI
-        |--------------------------------------------------------------------------
-        */
-
-        $totalAspirasi = $aspirasiQuery->countAllResults();
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | TOTAL PROVINSI
-        |--------------------------------------------------------------------------
-        */
-
-        $provinsiQuery = $aspirasiModel
+        $totalProvinsi = $scopeAspirasi(
+            $db->table('aspirasi')
+        )
             ->select('provinsi')
-            ->where('provinsi IS NOT NULL')
-            ->where('provinsi !=', '');
-
-        if (!empty($tahun)) {
-
-            $masaIds = $masaSidangModel
-                ->select('id')
-                ->where('tahun', $tahun)
-                ->findColumn('id');
-
-            if (!empty($masaIds)) {
-                $provinsiQuery->whereIn('masa_sidang_id', $masaIds);
-            } else {
-                $provinsiQuery->where('id', 0);
-            }
-        }
-
-        if (!empty($masaSidangId)) {
-            $provinsiQuery->where('masa_sidang_id', $masaSidangId);
-        }
-
-        if (!empty($subWilayahId)) {
-            $provinsiQuery->where('sub_wilayah_id', $subWilayahId);
-        }
-
-        $totalProvinsi = $provinsiQuery
+            ->where('provinsi IS NOT NULL', null, false)
+            ->where('provinsi !=', '')
             ->groupBy('provinsi')
             ->countAllResults();
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | TOTAL ISU
-        |--------------------------------------------------------------------------
-        */
-
-        $isuQuery = $aspirasiModel
+        $totalIsu = $scopeAspirasi(
+            $db->table('aspirasi')
+        )
             ->select('isu')
-            ->where('isu IS NOT NULL')
-            ->where('isu !=', '');
-
-        if (!empty($tahun)) {
-
-            $masaIds = $masaSidangModel
-                ->select('id')
-                ->where('tahun', $tahun)
-                ->findColumn('id');
-
-            if (!empty($masaIds)) {
-                $isuQuery->whereIn('masa_sidang_id', $masaIds);
-            } else {
-                $isuQuery->where('id', 0);
-            }
-        }
-
-        if (!empty($masaSidangId)) {
-            $isuQuery->where('masa_sidang_id', $masaSidangId);
-        }
-
-        if (!empty($subWilayahId)) {
-            $isuQuery->where('sub_wilayah_id', $subWilayahId);
-        }
-
-        $totalIsu = $isuQuery
+            ->where('isu IS NOT NULL', null, false)
+            ->where('isu !=', '')
             ->groupBy('isu')
             ->countAllResults();
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | DATA SOP
-        |--------------------------------------------------------------------------
-        */
-
-        $sopSteps = $sopModel
-            ->where('is_active', 1)
-            ->orderBy('step_number', 'ASC')
-            ->findAll();
-
-        $totalSteps = count($sopSteps);
-
-        $completedSteps = 0;
-
-        if ($totalSteps > 0) {
-
-            foreach ($sopSteps as &$step) {
-
-                $progress = $progressModel
-                    ->where('sop_step_id', $step['id'])
-                    ->first();
-
-                $step['status'] = 'pending';
-
-                if ($progress) {
-
-                    $step['status'] = $progress['status'] ?? 'pending';
-
-                    if (($progress['status'] ?? '') === 'completed') {
-                        $completedSteps++;
-                    }
-                }
-            }
-
-            unset($step);
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | PROGRESS PERCENT
-        |--------------------------------------------------------------------------
-        */
-
-        $progressPercent = $totalSteps > 0
-            ? round(($completedSteps / $totalSteps) * 100, 1)
-            : 0;
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | TOPIK ASPIRASI
-        |--------------------------------------------------------------------------
-        */
-
-        $topicQuery = $aspirasiModel
-            ->select('isu, COUNT(*) as total')
-            ->where('isu IS NOT NULL')
-            ->where('isu !=', '');
-
-        if (!empty($tahun)) {
-
-            $masaIds = $masaSidangModel
-                ->select('id')
-                ->where('tahun', $tahun)
-                ->findColumn('id');
-
-            if (!empty($masaIds)) {
-                $topicQuery->whereIn('masa_sidang_id', $masaIds);
-            } else {
-                $topicQuery->where('id', 0);
-            }
-        }
-
-        if (!empty($masaSidangId)) {
-            $topicQuery->where('masa_sidang_id', $masaSidangId);
-        }
-
-        if (!empty($subWilayahId)) {
-            $topicQuery->where('sub_wilayah_id', $subWilayahId);
-        }
-
-        $topicRows = $topicQuery
+        $topicRows = $scopeAspirasi(
+            $db->table('aspirasi')
+        )
+            ->select('isu, COUNT(*) AS total')
+            ->where('isu IS NOT NULL', null, false)
+            ->where('isu !=', '')
             ->groupBy('isu')
             ->orderBy('total', 'DESC')
-            ->findAll(5);
-
+            ->limit(5)
+            ->get()
+            ->getResultArray();
 
         $topics = [];
 
-        if ($totalAspirasi > 0) {
-
-            foreach ($topicRows as $topic) {
-
-                $topics[] = [
-                    'name' => $topic['isu'],
-                    'total' => (int) $topic['total'],
-                    'percent' => round(
-                        ((int) $topic['total'] / $totalAspirasi) * 100,
+        foreach ($topicRows as $topic) {
+            $topics[] = [
+                'name' => $topic['isu'],
+                'total' => (int) $topic['total'],
+                'percent' => $totalAspirasi > 0
+                    ? round(
+                        (int) $topic['total'] / $totalAspirasi * 100,
                         1
                     )
-                ];
-            }
+                    : 0,
+            ];
         }
 
+        $sopSteps = $db->table('sop_steps')
+            ->where('is_active', 1)
+            ->orderBy('step_number', 'ASC')
+            ->get()
+            ->getResultArray();
 
-        /*
-        |--------------------------------------------------------------------------
-        | DATA KE VIEW
-        |--------------------------------------------------------------------------
-        */
+        $totalSteps = count($sopSteps);
 
-        $data = [
+        // Periksa apakah progress dapat dihitung secara aman.
+        $progressScoped =
+            $db->tableExists('progress')
+            && $db->fieldExists('sub_wilayah_id', 'progress')
+            && $db->fieldExists('masa_sidang_id', 'progress')
+            && $db->fieldExists('sop_step_id', 'progress')
+            && $db->fieldExists('status', 'progress');
 
-            'title' => 'Dashboard LENTERA',
+        $calculateProgress = function (
+            int $wilayahId,
+            int $periodId
+        ) use ($db, $sopSteps, $totalSteps, $progressScoped) {
 
-            'totalAspirasi' => $totalAspirasi,
-            'totalIsu' => $totalIsu,
-            'totalProvinsi' => $totalProvinsi,
+            if (!$progressScoped || $totalSteps === 0) {
+                return null;
+            }
 
-            'sopSteps' => $sopSteps,
-            'totalSteps' => $totalSteps,
-            'completedSteps' => $completedSteps,
-            'progressPercent' => $progressPercent,
+            $rows = $db->table('progress')
+                ->select('sop_step_id, status')
+                ->where('sub_wilayah_id', $wilayahId)
+                ->where('masa_sidang_id', $periodId)
+                ->get()
+                ->getResultArray();
 
-            'topics' => $topics,
+            if (!$rows) {
+                return null;
+            }
 
-            'activePeriod' => $activePeriod,
+            $statusByStep = [];
 
-            'tahun' => $tahun,
-            'masaSidangId' => $masaSidangId,
-            'subWilayahId' => $subWilayahId,
+            foreach ($rows as $row) {
+                $statusByStep[(int) $row['sop_step_id']] =
+                    $row['status'];
+            }
 
-            'tahunList' => $tahunList,
-            'masaSidangList' => $masaSidangList,
-            'subWilayahList' => $subWilayahList,
-        ];
+            $completed = 0;
 
+            foreach ($sopSteps as $step) {
+                if (
+                    ($statusByStep[(int) $step['id']] ?? '')
+                    === 'completed'
+                ) {
+                    $completed++;
+                }
+            }
 
-        /*
-        |--------------------------------------------------------------------------
-        | RENDER
-        |--------------------------------------------------------------------------
-        */
+            return [
+                'completed' => $completed,
+                'total' => $totalSteps,
+                'percent' => round(
+                    $completed / $totalSteps * 100,
+                    1
+                ),
+                'statuses' => $statusByStep,
+            ];
+        };
 
-        return view('dashboard/index', $data);
+        // Progress periode yang sedang dipilih.
+        $progressPerWilayah = [];
+
+        foreach ($subWilayahList as $wilayah) {
+            $wilayahId = (int) $wilayah['id'];
+
+            if (
+                $subWilayahId !== null
+                && $wilayahId !== $subWilayahId
+            ) {
+                continue;
+            }
+
+            $progressPerWilayah[$wilayahId] =
+                $masaSidangId !== null
+                    ? $calculateProgress(
+                        $wilayahId,
+                        $masaSidangId
+                    )
+                    : null;
+        }
+
+        $progressSaatIni = $subWilayahId !== null
+            ? ($progressPerWilayah[$subWilayahId] ?? null)
+            : null;
+
+        foreach ($sopSteps as &$step) {
+            $step['status'] = $progressSaatIni['statuses'][
+                (int) $step['id']
+            ] ?? 'pending';
+        }
+        unset($step);
+
+        // Grafik tahunan: rata-rata dari Masa Sidang
+        // yang sudah memiliki data progress.
+        $grafikTahunan = [];
+
+        foreach ($tahunList as $tahunGrafik) {
+            $periodeRows = $db->table('masa_sidang')
+                ->where('tahun', $tahunGrafik)
+                ->get()
+                ->getResultArray();
+
+            $periodIds = [];
+
+            foreach ($periodeRows as $p) {
+                $periodIds[(int) $p['nomor']] = (int) $p['id'];
+            }
+
+            $series = [];
+
+            foreach ($subWilayahList as $wilayah) {
+                $wilayahId = (int) $wilayah['id'];
+
+                if (
+                    $subWilayahId !== null
+                    && $wilayahId !== $subWilayahId
+                ) {
+                    continue;
+                }
+
+                $nilai = [];
+
+                for ($ms = 1; $ms <= 5; $ms++) {
+                    if (!isset($periodIds[$ms])) {
+                        continue;
+                    }
+
+                    $hasil = $calculateProgress(
+                        $wilayahId,
+                        $periodIds[$ms]
+                    );
+
+                    if ($hasil !== null) {
+                        $nilai[] = $hasil['percent'];
+                    }
+                }
+
+                $series[$wilayahId] = $nilai
+                    ? round(array_sum($nilai) / count($nilai), 1)
+                    : null;
+            }
+
+            $grafikTahunan[] = [
+                'tahun' => $tahunGrafik,
+                'series' => $series,
+            ];
+        }
+
+        return view(
+            $isAdmin
+                ? 'dashboard/index'
+                : 'dashboard/koordinator',
+            [
+                'title' => 'Dashboard LENTERA',
+                'user' => $user,
+                'isAdmin' => $isAdmin,
+                'tahun' => $tahun,
+                'nomor' => $nomor,
+                'tahunList' => $tahunList,
+                'nomorMasaSidang' => $nomorMasaSidang,
+                'subWilayahId' => $subWilayahId,
+                'subWilayahList' => $subWilayahList,
+                'totalAspirasi' => $totalAspirasi,
+                'totalProvinsi' => $totalProvinsi,
+                'totalIsu' => $totalIsu,
+                'topics' => $topics,
+                'sopSteps' => $sopSteps,
+                'totalSteps' => $totalSteps,
+                'progressSaatIni' => $progressSaatIni,
+                'progressPerWilayah' => $progressPerWilayah,
+                'grafikTahunan' => $grafikTahunan,
+                'progressScoped' => $progressScoped,
+            ]
+        );
     }
 }

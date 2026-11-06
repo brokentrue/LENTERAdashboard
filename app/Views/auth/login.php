@@ -1,14 +1,9 @@
 <!DOCTYPE html>
-
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-
     <title>Login — LENTERA</title>
-
     <style>
         :root {
             --emerald: #174A3A;
@@ -23,17 +18,14 @@
             --danger: #B84C4C;
             --danger-bg: #FFF1F1;
         }
-
         * {
             box-sizing: border-box;
         }
-
         html,
         body {
             margin: 0;
             min-height: 100%;
         }
-
         body {
             min-height: 100vh;
             font-family: Inter, "Segoe UI", Arial, sans-serif;
@@ -52,11 +44,9 @@
             padding: 30px;
             overflow-x: hidden;
         }
-
         /* =========================
        BACKGROUND ORBS
     ========================= */
-
         .bg-orb {
             position: fixed;
             border-radius: 50%;
@@ -65,7 +55,6 @@
             opacity: .45;
             z-index: 0;
         }
-
         .orb-one {
             width: 180px;
             height: 180px;
@@ -74,7 +63,6 @@
             left: 4%;
             animation: floatOne 9s ease-in-out infinite;
         }
-
         .orb-two {
             width: 240px;
             height: 240px;
@@ -83,7 +71,6 @@
             bottom: 4%;
             animation: floatTwo 11s ease-in-out infinite;
         }
-
         .orb-three {
             width: 90px;
             height: 90px;
@@ -92,47 +79,36 @@
             top: 10%;
             animation: floatThree 7s ease-in-out infinite;
         }
-
         @keyframes floatOne {
-
             0%,
             100% {
                 transform: translate(0, 0);
             }
-
             50% {
                 transform: translate(25px, 18px);
             }
         }
-
         @keyframes floatTwo {
-
             0%,
             100% {
                 transform: translate(0, 0);
             }
-
             50% {
                 transform: translate(-25px, -20px);
             }
         }
-
         @keyframes floatThree {
-
             0%,
             100% {
                 transform: translate(0, 0) scale(1);
             }
-
             50% {
                 transform: translate(-15px, 20px) scale(1.08);
             }
         }
-
         /* =========================
        MAIN CARD
     ========================= */
-
         .login-wrapper {
             position: relative;
             z-index: 2;
@@ -148,26 +124,21 @@
             box-shadow:
                 0 30px 80px rgba(23, 74, 58, .12),
                 0 8px 25px rgba(23, 74, 58, .05);
-
             animation: cardEnter .75s cubic-bezier(.22, 1, .36, 1);
         }
-
         @keyframes cardEnter {
             from {
                 opacity: 0;
                 transform: translateY(28px) scale(.985);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0) scale(1);
             }
         }
-
         /* =========================
        LEFT BRAND PANEL
     ========================= */
-
         .brand-panel {
             position: relative;
             background:
@@ -185,7 +156,6 @@
             justify-content: space-between;
             overflow: hidden;
         }
-
         .brand-panel::before {
             content: "";
             position: absolute;
@@ -197,7 +167,6 @@
             top: -150px;
             animation: ringFloat 12s ease-in-out infinite;
         }
-
         .brand-panel::after {
             content: "";
             position: absolute;
@@ -209,42 +178,33 @@
             bottom: -320px;
             animation: ringFloatReverse 15s ease-in-out infinite;
         }
-
         @keyframes ringFloat {
-
             0%,
             100% {
                 transform: translate(0, 0);
             }
-
             50% {
                 transform: translate(-15px, 20px);
             }
         }
-
         @keyframes ringFloatReverse {
-
             0%,
             100% {
                 transform: translate(0, 0);
             }
-
             50% {
                 transform: translate(20px, -15px);
             }
         }
-
         .brand-content,
         .brand-footer,
         .institution-logos {
             position: relative;
             z-index: 3;
         }
-
         /* =========================
        INSTITUTION LOGOS
     ========================= */
-
         .institution-logos {
             display: flex;
             align-items: center;
@@ -252,7 +212,6 @@
             margin-bottom: 48px;
             animation: fadeUp .8s .1s both;
         }
-
         .institution-logo {
             height: 44px;
             width: auto;
@@ -261,17 +220,14 @@
             object-position: center;
             display: block;
         }
-
         .logo-divider {
             width: 1px;
             height: 34px;
             background: rgba(255, 255, 255, .24);
         }
-
         /* =========================
        LENTERA MARK
     ========================= */
-
         .logo-mark {
             width: 56px;
             height: 56px;
@@ -284,39 +240,31 @@
             font-size: 22px;
             font-weight: 800;
             margin-bottom: 25px;
-
             box-shadow:
                 0 10px 30px rgba(0, 0, 0, .08);
-
             animation:
                 markEnter .8s .25s both,
                 markPulse 4s 1.2s ease-in-out infinite;
         }
-
         @keyframes markEnter {
             from {
                 opacity: 0;
                 transform: scale(.7) rotate(-8deg);
             }
-
             to {
                 opacity: 1;
                 transform: scale(1) rotate(0);
             }
         }
-
         @keyframes markPulse {
-
             0%,
             100% {
                 box-shadow: 0 10px 30px rgba(0, 0, 0, .08);
             }
-
             50% {
                 box-shadow: 0 12px 35px rgba(255, 255, 255, .10);
             }
         }
-
         .brand-name {
             font-size: 46px;
             font-weight: 800;
@@ -324,7 +272,6 @@
             margin: 0 0 9px;
             animation: fadeUp .8s .35s both;
         }
-
         .brand-subtitle {
             font-size: 16px;
             line-height: 1.6;
@@ -333,7 +280,6 @@
             margin: 0;
             animation: fadeUp .8s .45s both;
         }
-
         .brand-description {
             margin-top: 36px;
             padding-left: 16px;
@@ -344,7 +290,6 @@
             max-width: 360px;
             animation: fadeUp .8s .55s both;
         }
-
         .brand-footer {
             font-size: 11px;
             line-height: 1.6;
@@ -352,23 +297,19 @@
             max-width: 330px;
             animation: fadeUp .8s .65s both;
         }
-
         @keyframes fadeUp {
             from {
                 opacity: 0;
                 transform: translateY(15px);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
-
         /* =========================
        RIGHT FORM PANEL
     ========================= */
-
         .form-panel {
             position: relative;
             padding: 60px;
@@ -376,29 +317,23 @@
             align-items: center;
             background: rgba(255, 255, 255, .98);
         }
-
         .form-panel>.institution-logos {
             position: absolute;
             top: 28px;
             right: 28px;
-
             display: flex;
             align-items: center;
             gap: 14px;
-
             margin: 0;
             z-index: 5;
-
             animation: fadeUp .8s .1s both;
         }
-
         /* .form-panel>.institution-logos .institution-logo {
             height: 52px;
             width: auto;
             max-width: 165px;
             object-fit: contain;
         }
-
         .form-panel>.institution-logos .logo-divider {
             width: 1px;
             height: 38px;
@@ -408,70 +343,57 @@
             position: absolute;
             top: 28px;
             right: 28px;
-
             display: flex;
             align-items: center;
             gap: 6px;
-
             margin: 0;
             z-index: 5;
         }
-
         .form-panel>.institution-logos .institution-logo:first-child {
             height: 52px;
         }
-
         .form-panel>.institution-logos .institution-logo:last-child {
             height: 48px;
         }
-
         .form-panel>.institution-logos .logo-divider {
             width: 1px;
             height: 34px;
             background: var(--border);
         }
-
         .form-wrapper {
             width: 100%;
             max-width: 350px;
             margin: auto;
             animation: formEnter .8s .15s both;
         }
-
         @keyframes formEnter {
             from {
                 opacity: 0;
                 transform: translateX(18px);
             }
-
             to {
                 opacity: 1;
                 transform: translateX(0);
             }
         }
-
         .welcome {
             margin-bottom: 32px;
         }
-
         .welcome h2 {
             margin: 0 0 8px;
             font-size: 28px;
             letter-spacing: -.6px;
             font-weight: 750;
         }
-
         .welcome p {
             margin: 0;
             color: var(--muted);
             font-size: 14px;
             line-height: 1.6;
         }
-
         /* =========================
        ERROR ALERT
     ========================= */
-
         .alert {
             display: flex;
             align-items: flex-start;
@@ -484,10 +406,8 @@
             font-size: 13px;
             line-height: 1.5;
             margin-bottom: 22px;
-
             animation: alertEnter .4s ease both;
         }
-
         .alert::before {
             content: "!";
             flex: 0 0 auto;
@@ -501,55 +421,43 @@
             font-weight: 800;
             font-size: 11px;
         }
-
         @keyframes alertEnter {
             from {
                 opacity: 0;
                 transform: translateY(-8px);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
-
         .alert.shake {
             animation: shake .45s ease;
         }
-
         @keyframes shake {
-
             0%,
             100% {
                 transform: translateX(0);
             }
-
             20% {
                 transform: translateX(-7px);
             }
-
             40% {
                 transform: translateX(7px);
             }
-
             60% {
                 transform: translateX(-5px);
             }
-
             80% {
                 transform: translateX(5px);
             }
         }
-
         /* =========================
        FORM
     ========================= */
-
         .form-group {
             margin-bottom: 20px;
         }
-
         .form-group label {
             display: block;
             margin-bottom: 8px;
@@ -557,11 +465,9 @@
             font-weight: 650;
             color: var(--text);
         }
-
         .input-wrapper {
             position: relative;
         }
-
         .input-wrapper input {
             width: 100%;
             height: 50px;
@@ -578,26 +484,21 @@
                 background .2s ease,
                 transform .2s ease;
         }
-
         .input-wrapper input::placeholder {
             color: #A2ACA6;
         }
-
         .input-wrapper input:hover {
             border-color: #D3DED7;
         }
-
         .input-wrapper input:focus {
             border-color: var(--forest);
             background: var(--white);
             box-shadow: 0 0 0 4px rgba(40, 99, 78, .08);
             transform: translateY(-1px);
         }
-
         .password-input {
             padding-right: 105px !important;
         }
-
         .toggle-password {
             position: absolute;
             right: 10px;
@@ -613,16 +514,13 @@
             border-radius: 7px;
             transition: all .2s ease;
         }
-
         .toggle-password:hover {
             color: var(--forest);
             background: var(--sage-soft);
         }
-
         /* =========================
        LOGIN BUTTON
     ========================= */
-
         .login-button {
             position: relative;
             width: 100%;
@@ -641,7 +539,6 @@
             margin-top: 8px;
             overflow: hidden;
         }
-
         .login-button::after {
             content: "";
             position: absolute;
@@ -653,28 +550,23 @@
             transform: translateX(-100%);
             transition: transform .6s ease;
         }
-
         .login-button:hover::after {
             transform: translateX(100%);
         }
-
         .login-button:hover {
             background: var(--forest);
             transform: translateY(-1px);
             box-shadow: 0 9px 22px rgba(23, 74, 58, .18);
         }
-
         .login-button:active {
             transform: translateY(0);
         }
-
         .login-button:disabled {
             cursor: not-allowed;
             opacity: .85;
             transform: none;
             box-shadow: none;
         }
-
         .button-content {
             position: relative;
             z-index: 2;
@@ -683,7 +575,6 @@
             justify-content: center;
             gap: 9px;
         }
-
         .spinner {
             width: 16px;
             height: 16px;
@@ -692,17 +583,66 @@
             border-radius: 50%;
             animation: spin .7s linear infinite;
         }
-
         @keyframes spin {
             to {
                 transform: rotate(360deg);
             }
         }
 
+        /* REGISTER BUTTON */
+        .register-section {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .register-section p {
+            margin: 0 0 12px;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .register-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 48px;
+            border: 1px solid var(--emerald);
+            border-radius: 11px;
+            background: transparent;
+            color: var(--emerald);
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all .2s ease;
+        }
+
+        .register-button:hover {
+            background: var(--sage-soft);
+            border-color: var(--forest);
+            transform: translateY(-1px);
+        }
+
+        .register-button:focus-visible {
+            outline: 3px solid rgba(40, 99, 78, .25);
+            outline-offset: 3px;
+        }
+
+        .alert-success {
+            background: #F0F8F2;
+            border-color: #CDE5D3;
+            color: #28634E;
+        }
+
+        .alert-success::before {
+            content: "✓";
+            background: #DDEBE1;
+        }
+
         /* =========================
        SECURITY NOTE
     ========================= */
-
         .security-note {
             margin-top: 23px;
             text-align: center;
@@ -710,7 +650,6 @@
             color: var(--muted);
             line-height: 1.55;
         }
-
         .security-dot {
             display: inline-block;
             width: 5px;
@@ -720,11 +659,9 @@
             margin-right: 5px;
             vertical-align: middle;
         }
-
         /* =========================
        COPYRIGHT
     ========================= */
-
         .copyright {
             margin-top: 28px;
             padding-top: 18px;
@@ -734,90 +671,69 @@
             font-size: 10px;
             line-height: 1.55;
         }
-
         /* =========================
        RESPONSIVE
     ========================= */
-
         @media (max-width: 760px) {
-
             body {
                 padding: 18px;
             }
-
             .login-wrapper {
                 max-width: 460px;
                 min-height: auto;
                 grid-template-columns: 1fr;
                 border-radius: 22px;
             }
-
             .brand-panel {
                 padding: 38px;
                 min-height: 370px;
             }
-
             .institution-logos {
                 margin-bottom: 34px;
             }
-
             .institution-logo {
                 height: 38px;
                 max-width: 130px;
             }
-
             .brand-name {
                 font-size: 38px;
             }
-
             .brand-description {
                 margin-top: 24px;
             }
-
             .brand-footer {
                 margin-top: 40px;
             }
-
             .form-panel {
                 padding: 38px;
             }
         }
-
         @media (max-width: 420px) {
-
             body {
                 padding: 10px;
             }
-
             .brand-panel,
             .form-panel {
                 padding: 28px;
             }
-
             .brand-name {
                 font-size: 34px;
             }
-
             .institution-logos {
                 gap: 12px;
             }
-
             .institution-logo {
                 height: 34px;
                 max-width: 110px;
             }
-
             .logo-divider {
                 height: 28px;
             }
         }
-
         /* =========================
        REDUCED MOTION
     ========================= */
-
         @media (prefers-reduced-motion: reduce) {
-
             *,
             *::before,
             *::after {
@@ -827,120 +743,84 @@
             }
         }
     </style>
-
-
 </head>
-
 <body>
-
-
     <div class="bg-orb orb-one"></div>
     <div class="bg-orb orb-two"></div>
     <div class="bg-orb orb-three"></div>
-
     <main class="login-wrapper">
-
         <!-- =========================
          BRANDING
     ========================== -->
-
         <section class="brand-panel">
-
             <div class="brand-content">
-
                 <!-- <div class="institution-logos">
-
                     <img src="<?= base_url('assets/img/dpdlogo.png') ?>" alt="DPD RI" class="institution-logo">
                     <img src="<?= base_url('assets/img/setjenlogo.png') ?>" alt="Sekretariat Jenderal DPD RI" class="institution-logo">
-
                 </div> -->
-
                 <div class="logo-mark">
                     L
                 </div>
-
                 <h1 class="brand-name">
                     LENTERA
                 </h1>
-
                 <p class="brand-subtitle">
                     Layanan Terpadu Monitoring Aspirasi
                 </p>
-
                 <div class="brand-description">
                     Sistem terpadu untuk memantau proses,
                     perkembangan, dan tindak lanjut aspirasi
                     secara terstruktur.
                 </div>
-
             </div>
-
             <div class="brand-footer">
                 Sistem Internal · Sekretariat Wakil Ketua DPD RI
             </div>
-
         </section>
-
-
         <!-- =========================
          LOGIN FORM
     ========================== -->
-
         <section class="form-panel">
-
             <div class="institution-logos">
                 <img src="<?= base_url('assets/img/dpdlogo.png') ?>"
                     alt="DPD RI"
                     class="institution-logo">
-
                 <div class="logo-divider"></div>
-
                 <img src="<?= base_url('assets/img/setjenlogo.png') ?>"
                     alt="Sekretariat Jenderal DPD RI"
                     class="institution-logo">
             </div>
-
             <div class="form-wrapper">
-
                 <div class="welcome">
-
                     <h2>
                         Selamat Datang
                     </h2>
-
                     <p>
                         Silakan masuk untuk mengakses
                         dashboard LENTERA.
                     </p>
-
                 </div>
-
+                <?php if (session()->getFlashdata('success')): ?>
+                    <div class="alert alert-success" role="status">
+                        <?= esc(session()->getFlashdata('success')) ?>
+                    </div>
+                <?php endif; ?>
 
                 <?php if (session()->getFlashdata('error')): ?>
-
                     <div class="alert" id="loginAlert">
                         <?= esc(session()->getFlashdata('error')) ?>
                     </div>
-
                 <?php endif; ?>
-
-
                 <form
                     action="<?= site_url('login') ?>"
                     method="post"
                     id="loginForm">
-
                     <?= csrf_field() ?>
-
-
                     <div class="form-group">
-
                         <label for="username">
                             Username
                         </label>
-
                         <div class="input-wrapper">
-
                             <input
                                 type="text"
                                 id="username"
@@ -948,20 +828,13 @@
                                 placeholder="Masukkan username"
                                 autocomplete="username"
                                 required>
-
                         </div>
-
                     </div>
-
-
                     <div class="form-group">
-
                         <label for="password">
                             Password
                         </label>
-
                         <div class="input-wrapper">
-
                             <input
                                 type="password"
                                 id="password"
@@ -970,7 +843,6 @@
                                 placeholder="Masukkan password"
                                 autocomplete="current-password"
                                 required>
-
                             <button
                                 type="button"
                                 class="toggle-password"
@@ -979,12 +851,8 @@
                                 id="togglePasswordButton">
                                 Tampilkan
                             </button>
-
                         </div>
-
                     </div>
-
-
                     <button
                         type="submit"
                         class="login-button"
@@ -995,51 +863,44 @@
                             Masuk ke LENTERA
                         </span>
                     </button>
-
                 </form>
 
+                <!-- REGISTER -->
+                <div class="register-section">
+                    <p>Belum memiliki akun LENTERA?</p>
+                    <a href="<?= site_url('register') ?>" class="register-button">
+                        Daftar Akun
+                    </a>
+                </div>
 
                 <div class="security-note">
                     <span class="security-dot"></span>
                     Akses sistem terbatas untuk pengguna
                     yang memiliki hak akses LENTERA.
                 </div>
-
-
                 <div class="copyright">
                     © <?= date('Y') ?> LENTERA<br>
                     Dikembangkan oleh Bagian Sekretariat Wakil Ketua
                     DPD RI Bidang Otonomi Daerah, Politik dan Hukum
                 </div>
-
             </div>
-
         </section>
-
     </main>
-
-
     <script>
         /* =========================
        SHOW / HIDE PASSWORD
     ========================== */
-
         function togglePassword() {
-
             const password = document.getElementById('password');
             const button = document.getElementById('togglePasswordButton');
-
             if (password.type === 'password') {
-
                 password.type = 'text';
                 button.textContent = 'Sembunyikan';
                 button.setAttribute(
                     'aria-label',
                     'Sembunyikan password'
                 );
-
             } else {
-
                 password.type = 'password';
                 button.textContent = 'Tampilkan';
                 button.setAttribute(
@@ -1048,45 +909,28 @@
                 );
             }
         }
-
-
         /* =========================
            LOGIN LOADING
         ========================== */
-
         const loginForm = document.getElementById('loginForm');
         const loginButton = document.getElementById('loginButton');
         const buttonContent = document.getElementById('buttonContent');
-
         loginForm.addEventListener('submit', function() {
-
             loginButton.disabled = true;
-
             buttonContent.innerHTML = `
             <span class="spinner"></span>
             <span>Memproses...</span>
         `;
         });
-
-
         /* =========================
            ERROR ALERT ANIMATION
         ========================== */
-
         const loginAlert = document.getElementById('loginAlert');
-
         if (loginAlert) {
-
             setTimeout(function() {
-
                 loginAlert.classList.add('shake');
-
             }, 250);
-
         }
     </script>
-
-
 </body>
-
 </html>
