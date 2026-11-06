@@ -5,16 +5,31 @@ use CodeIgniter\Router\RouteCollection;
 
 /** @var RouteCollection $routes */
 
-// Auth
+// ========================================
+// AUTH
+// ========================================
+
 $routes->get('/login', 'Auth::index');
 $routes->post('/login', 'Auth::login');
+
 $routes->get('/register', 'Auth::register');
 $routes->post('/register', 'Auth::storeRegister');
-$routes->post('/logout', 'Auth::logout', ['filter' => 'csrf']);
 
-// Dashboard
-$routes->get('/dashboard', 'Dashboard::index', ['filter' => 'auth']);
-$routes->get('/admin/users', 'UserManagement::index', ['filter' => 'admin']);
+$routes->post('/logout', 'Auth::logout', [
+    'filter' => 'csrf'
+]);
+
+// ========================================
+// DASHBOARD
+// ========================================
+
+$routes->get('/dashboard', 'Dashboard::index', [
+    'filter' => 'auth'
+]);
+
+$routes->get('/admin/users', 'UserManagement::index', [
+    'filter' => 'admin'
+]);
 
 $routes->post(
     '/admin/users/approve/(:num)',
@@ -22,34 +37,62 @@ $routes->post(
     ['filter' => ['admin', 'csrf']]
 );
 
-// Progress / Detail SOP
-$routes->get('/progress', 'Progress::index', ['filter' => 'auth']);
-$routes->get('/progress/(:num)', 'Progress::detail/$1', ['filter' => 'auth']);
+// ========================================
+// PROGRESS SOP
+// ========================================
 
-// Knowledge Repository
-$routes->get(
-    '/repository',
-    'Repository::index',
-    ['filter' => 'auth']
+// Kembali ke Dashboard
+$routes->get('/progress', 'Progress::index', [
+    'filter' => 'auth'
+]);
+
+// Detail SOP berdasarkan ID SOP
+$routes->get('/progress/(:num)', 'Progress::detail/$1', [
+    'filter' => 'auth'
+]);
+
+// Simpan perubahan status sub-tahapan SOP
+$routes->post(
+    '/progress/(:num)/update',
+    'Progress::update/$1',
+    ['filter' => ['auth', 'csrf']]
 );
 
+// ========================================
+// KNOWLEDGE REPOSITORY
+// ========================================
+
+// Daftar dokumen
+$routes->get('/repository', 'Repository::index', [
+    'filter' => 'auth'
+]);
+
+// Upload dokumen
 $routes->post(
     '/repository/upload',
     'Repository::upload',
     ['filter' => ['auth', 'csrf']]
 );
 
+// Download dokumen
 $routes->get(
     '/repository/download/(:num)',
     'Repository::download/$1',
     ['filter' => 'auth']
 );
 
+// Preview dokumen
 $routes->get(
     '/repository/preview/(:num)',
     'Repository::preview/$1',
     ['filter' => 'auth']
 );
 
-// Testing
-// $routes->get('/progress-test/initialize', 'ProgressTest::initialize');
+// ========================================
+// TESTING (NONAKTIF)
+// ========================================
+
+// $routes->get(
+//     '/progress-test/initialize',
+//     'ProgressTest::initialize'
+// );

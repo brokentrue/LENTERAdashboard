@@ -191,6 +191,11 @@ select {
     border-bottom: 1px solid var(--border);
 }
 .sop-row strong { font-size: 12px; }
+.sop-link { display: inline-flex; align-items: center; gap: 8px; color: var(--emerald); font-size: 12px; font-weight: 700; text-decoration: none; line-height: 1.5; }
+.sop-link:hover { color: #37966B; text-decoration: underline; }
+.sop-link:focus-visible { outline: 2px solid #37966B; outline-offset: 3px; }
+.feature-link { display: inline-block; margin-top: 8px; padding: 9px 13px; background: var(--emerald); border-radius: 9px; color: white; font-size: 12px; font-weight: 700; text-decoration: none; }
+.feature-link:hover { background: var(--forest); }
 .status {
     color: var(--forest);
     font-size: 11px;
@@ -327,7 +332,7 @@ select {
                 Penyimpanan dokumen Reses dan bukti dukung
                 kegiatan Sub Wilayah.
             </p>
-            <span class="tag">Dalam Pengembangan</span>
+            <a class="feature-link" href="<?= site_url('repository') ?>">Buka Repository ↗</a>
         </div>
     </section>
 
@@ -351,7 +356,7 @@ select {
                 <?= $progressSaatIni === null
                     ? 'Belum ada data progres'
                     : $completed . ' dari ' . $totalSteps
-                        . ' tahapan selesai' ?>
+                        . ' dari ' . ($progressSaatIni['total'] ?? 0) . ' sub-tahapan selesai' ?>
             </p>
 
             <?php if (!$progressScoped): ?>
@@ -381,22 +386,15 @@ select {
 
             <?php foreach ($sopSteps as $step): ?>
                 <div class="sop-row">
-                    <strong>
-                        <?= esc($step['step_number']) ?>.
-                        <?= esc($step['title']) ?>
-                    </strong>
+                    <a class="sop-link" href="<?= site_url('progress/' . (int) $step['id']) . '?' . http_build_query(['tahun' => $tahun, 'masa_sidang' => $nomor]) ?>">
+                        <?= esc($step['step_number']) ?>. <?= esc($step['title']) ?> <span aria-hidden="true">↗</span>
+                    </a>
                     <span class="status">
-                        <?= $progressSaatIni === null
-                            ? 'Belum ada data'
-                            : (
-                                $step['status'] === 'completed'
-                                ? 'Selesai'
-                                : (
-                                    $step['status'] === 'process'
-                                    ? 'Proses'
-                                    : 'Belum'
-                                )
-                            ) ?>
+                        <?= esc(match ($step['status'] ?? 'belum') {
+                            'selesai' => 'Selesai',
+                            'proses' => 'Dalam Proses',
+                            default => 'Belum Dimulai',
+                        }) ?>
                     </span>
                 </div>
             <?php endforeach; ?>
