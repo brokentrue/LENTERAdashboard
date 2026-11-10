@@ -15,6 +15,7 @@ class UserModel extends Model
         'username',
         'password',
         'role_id',
+        'sub_wilayah_id',
         'is_active',
     ];
 
