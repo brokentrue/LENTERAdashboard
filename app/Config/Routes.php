@@ -1,4 +1,3 @@
-
 <?php
 
 use CodeIgniter\Router\RouteCollection;
@@ -67,13 +66,6 @@ $routes->get('/repository', 'Repository::index', [
     'filter' => 'auth'
 ]);
 
-// Upload dokumen
-$routes->post(
-    '/repository/upload',
-    'Repository::upload',
-    ['filter' => ['auth', 'csrf']]
-);
-
 // Download dokumen
 $routes->get(
     '/repository/download/(:num)',
@@ -96,3 +88,7 @@ $routes->get(
 //     '/progress-test/initialize',
 //     'ProgressTest::initialize'
 // );
+
+// INPUT BERKAS RESES - khusus Koordinator, pemeriksaan role juga di controller
+$routes->get('/reses', 'Reses::index', ['filter' => 'auth']);
+$routes->post('/reses/store', 'Reses::store', ['filter' => ['auth', 'csrf']]);
